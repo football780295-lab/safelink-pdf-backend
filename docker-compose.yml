@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: pdf_tool_backend
+    expose:
+      - "8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - MAX_FILE_SIZE_MB=50
+      - FILE_TTL_MINUTES=15
+      - CLEANUP_INTERVAL_SECONDS=300
+      - RATE_LIMIT_PER_MINUTE=60/minute
+      - MAX_CONCURRENT_HEAVY_JOBS=2
+    volumes:
+      - temp_data:/app/temp_uploads
+    restart: unless-stopped
+    mem_limit: 1536m
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/api/health\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: pdf_tool_frontend
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    mem_limit: 512m
+
+  nginx:
+    image: nginx:alpine
+    container_name: pdf_tool_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - certbot_data:/var/www/certbot
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    mem_limit: 256m
+
+volumes:
+  temp_data:
+  certbot_data:

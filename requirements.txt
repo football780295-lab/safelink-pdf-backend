@@ -1,0 +1,10 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+pikepdf>=9.0.0
+PyMuPDF>=1.24.0
+Pillow>=10.4.0
+img2pdf>=0.5.1
+pypdf>=4.3.0
+slowapi>=0.1.9
+python-dotenv>=1.0.1

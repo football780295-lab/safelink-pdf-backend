@@ -1,0 +1,16 @@
+backend/venv
+venv
+backend/temp_uploads
+temp_uploads
+frontend/node_modules
+frontend/.next
+frontend/test-results
+frontend/playwright-report
+node_modules
+.pytest_cache
+__pycache__
+*.pyc
+.git
+.env
+.env.local
+backend/tests
